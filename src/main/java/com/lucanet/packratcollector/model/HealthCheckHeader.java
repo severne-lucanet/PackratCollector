@@ -4,6 +4,7 @@ public class HealthCheckHeader {
 
   private String systemUUID;
   private long sessionTimestamp;
+  private long healthCheckTimestamp;
 
   public HealthCheckHeader() {
   }
@@ -24,8 +25,16 @@ public class HealthCheckHeader {
     this.sessionTimestamp = sessionTimestamp;
   }
 
+  public long getHealthCheckTimestamp() {
+    return healthCheckTimestamp;
+  }
+
+  public void setHealthCheckTimestamp(long healthCheckTimestamp) {
+    this.healthCheckTimestamp = healthCheckTimestamp;
+  }
+
   @Override
   public String toString() {
-    return String.format("%s@%d", systemUUID, sessionTimestamp);
+    return String.format("%s:%d@%d", systemUUID, sessionTimestamp, healthCheckTimestamp);
   }
 }

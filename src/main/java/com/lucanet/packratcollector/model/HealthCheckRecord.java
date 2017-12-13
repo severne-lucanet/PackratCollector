@@ -1,17 +1,20 @@
 package com.lucanet.packratcollector.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.ektorp.support.CouchDbDocument;
-import org.json.JSONObject;
 
 public class HealthCheckRecord extends CouchDbDocument {
 
   private String systemUUID;
   private long sessionTimestamp;
-  private JSONObject data;
+  private long healthCheckTimestamp;
+  private JsonNode data;
 
-  public HealthCheckRecord(String systemUUID, long sessionTimestamp, JSONObject data) {
-    this.systemUUID = systemUUID;
-    this.sessionTimestamp = sessionTimestamp;
+  public HealthCheckRecord(HealthCheckHeader healthCheckHeader, JsonNode data) {
+    this.systemUUID = healthCheckHeader.getSystemUUID();
+    this.sessionTimestamp = healthCheckHeader.getSessionTimestamp();
+    this.healthCheckTimestamp = healthCheckHeader.getHealthCheckTimestamp();
+    setId(healthCheckHeader.toString());
     this.data = data;
   }
 
@@ -31,11 +34,19 @@ public class HealthCheckRecord extends CouchDbDocument {
     this.sessionTimestamp = sessionTimestamp;
   }
 
-  public JSONObject getData() {
+  public long getHealthCheckTimestamp() {
+    return healthCheckTimestamp;
+  }
+
+  public void setHealthCheckTimestamp(long healthCheckTimestamp) {
+    this.healthCheckTimestamp = healthCheckTimestamp;
+  }
+
+  public JsonNode getData() {
     return data;
   }
 
-  public void setData(JSONObject data) {
+  public void setData(JsonNode data) {
     this.data = data;
   }
 }

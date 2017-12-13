@@ -1,19 +1,21 @@
 package com.lucanet.packratcollector.persister.local;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.model.HealthCheckRecord;
 import com.lucanet.packratcollector.persister.RecordPersister;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.ektorp.UpdateConflictException;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,11 +52,16 @@ public class LocalRecordPersister implements RecordPersister {
   }
 
   @Override
-  public void persistJSONRecord(ConsumerRecord<HealthCheckHeader, JSONObject> record) {
+  public void persistJSONRecord(ConsumerRecord<HealthCheckHeader, JsonNode> record) {
     String dbName = record.topic().toLowerCase();
     if (repoMap.containsKey(dbName)) {
-      HealthCheckRecord healthCheckRecord = new HealthCheckRecord(record.key().getSystemUUID(), record.key().getSessionTimestamp(), record.value());
-      repoMap.get(dbName).add(healthCheckRecord);
+      HealthCheckHeader header = record.key();
+      HealthCheckRecord healthCheckRecord = new HealthCheckRecord(header, record.value());
+      try {
+        repoMap.get(dbName).add(healthCheckRecord);
+      } catch (UpdateConflictException uce) {
+        LOGGER.warn("Record already exists for {} in database '{}' - skipping insertion", header, dbName);
+      }
     } else {
       LOGGER.warn("Database '{}' does not exist - skipping insertion", dbName);
     }
@@ -63,5 +70,11 @@ public class LocalRecordPersister implements RecordPersister {
   @Override
   public void persistFileRecord(ConsumerRecord<HealthCheckHeader, byte[]> record) {
     //TODO
+  }
+
+  @PreDestroy
+  public void shutdown() {
+    LOGGER.info("Shutting down CouchDB Instance");
+    dbInstance.getConnection().shutdown();
   }
 }

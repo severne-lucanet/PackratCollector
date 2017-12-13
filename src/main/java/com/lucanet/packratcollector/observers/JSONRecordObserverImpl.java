@@ -1,10 +1,12 @@
 package com.lucanet.packratcollector.observers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.persister.RecordPersister;
+import com.lucanet.packratcollector.services.OffsetLookupService;
 import io.reactivex.disposables.Disposable;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.json.JSONObject;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,12 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(JSONRecordObserverImpl.class);
 
   private final RecordPersister recordPersister;
+  private final OffsetLookupService offsetLookupService;
 
   @Autowired
-  public JSONRecordObserverImpl(RecordPersister recordPersister) {
+  public JSONRecordObserverImpl(RecordPersister recordPersister, OffsetLookupService offsetLookupService) {
     this.recordPersister = recordPersister;
+    this.offsetLookupService = offsetLookupService;
   }
 
   @Override
@@ -28,7 +32,8 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
   }
 
   @Override
-  public void onNext(ConsumerRecord<HealthCheckHeader, JSONObject> consumerRecord) {
+  public void onNext(ConsumerRecord<HealthCheckHeader, JsonNode> consumerRecord) {
+    offsetLookupService.saveOffset(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), (consumerRecord.offset() + 1));
     if ((consumerRecord.key() != null) && (consumerRecord.value() != null)) {
       recordPersister.persistJSONRecord(consumerRecord);
     } else {

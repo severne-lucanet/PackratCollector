@@ -16,8 +16,9 @@ repositories {
 ext.jacksonVersion='2.9.3'
 
 dependencies {
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.7'
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: '1.0.0'
     compile group: 'org.ektorp', name: 'org.ektorp', version: '1.5.0'
