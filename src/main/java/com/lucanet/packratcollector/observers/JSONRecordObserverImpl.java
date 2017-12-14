@@ -1,6 +1,5 @@
 package com.lucanet.packratcollector.observers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.persister.RecordPersister;
 import com.lucanet.packratcollector.services.OffsetLookupService;
@@ -11,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class JSONRecordObserverImpl implements JSONRecordObserver {
@@ -32,9 +33,10 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
   }
 
   @Override
-  public void onNext(ConsumerRecord<HealthCheckHeader, JsonNode> consumerRecord) {
+  public void onNext(ConsumerRecord<HealthCheckHeader, Map<String, Object>> consumerRecord) {
     offsetLookupService.saveOffset(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), (consumerRecord.offset() + 1));
     if ((consumerRecord.key() != null) && (consumerRecord.value() != null)) {
+      LOGGER.debug("Record received for '{}': {}", consumerRecord.topic(), consumerRecord.value());
       recordPersister.persistJSONRecord(consumerRecord);
     } else {
       LOGGER.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());

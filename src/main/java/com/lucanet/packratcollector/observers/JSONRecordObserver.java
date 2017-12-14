@@ -4,5 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-public interface JSONRecordObserver extends RecordObserver<ConsumerRecord<HealthCheckHeader, JsonNode>> {
+import java.util.Map;
+
+public interface JSONRecordObserver extends RecordObserver<ConsumerRecord<HealthCheckHeader, Map<String, Object>>> {
 }
