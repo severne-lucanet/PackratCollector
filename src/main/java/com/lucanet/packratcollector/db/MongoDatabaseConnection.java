@@ -19,15 +19,18 @@ import java.util.Map;
 
 @Service
 public class MongoDatabaseConnection implements DatabaseConnection {
-
+  // =========================== Class Variables ===========================79
   private static final String OFFSETS_COLLECTION_NAME = "offsets";
   private static final String OFFSETS_TOPIC_KEY       = "topic";
   private static final String OFFSETS_PARTITION_KEY   = "partition";
   private static final String OFFSETS_OFFSET_KEY      = "offset";
 
-  private final Logger logger = LoggerFactory.getLogger(MongoDatabaseConnection.class);
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger        logger;
   private final MongoDatabase healthCheckDB;
 
+  // ============================  Constructors  ===========================79
   @Autowired
   public MongoDatabaseConnection(
     @Value("${packrat.persister.local.url}") String dbURL,
@@ -35,6 +38,7 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     @Value("${packrat.persister.local.username}") String username,
     @Value("${packrat.persister.local.password}") String password
   ) {
+    logger = LoggerFactory.getLogger(MongoDatabaseConnection.class);
     logger.info("Building CouchDB connection to {}:{}@{}:{}", username, password, dbURL, dbPort);
     MongoClientOptions.Builder clientOptionsBuilder = new MongoClientOptions.Builder();
     MongoClient mongoClient = new MongoClient(
@@ -45,6 +49,7 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     this.healthCheckDB = mongoClient.getDatabase("packrat_healthcheck");
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void persistRecord(ConsumerRecord<HealthCheckHeader, Map<String, Object>> record) throws IllegalArgumentException {
     String collectionName = record.topic().toLowerCase();
@@ -107,4 +112,6 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     }
   }
 
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

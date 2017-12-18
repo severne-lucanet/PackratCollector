@@ -8,13 +8,16 @@ import java.util.Properties;
 
 @Configuration
 public class PackratCollectorConfig {
-
-  private final String bootstrapServers;
-  private final String groupId;
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final String  bootstrapServers;
+  private final String  groupId;
   private final Boolean enableAutoCommit;
-  private final Long autoCommitInterval;
-  private final Long sessionTimeout;
+  private final Long    autoCommitInterval;
+  private final Long    sessionTimeout;
 
+  // ============================  Constructors  ===========================79
   public PackratCollectorConfig(
       @Value("${packrat.bootstrapServers}") String bootstrapServers,
       @Value("${packrat.groupId}") String groupId,
@@ -29,6 +32,7 @@ public class PackratCollectorConfig {
     this.sessionTimeout = sessionTimeout;
   }
 
+  // ============================ Public Methods ===========================79
   public Properties generateCommonProperties() {
     Properties props = new Properties();
     props.put("bootstrap.servers", bootstrapServers);
@@ -40,4 +44,6 @@ public class PackratCollectorConfig {
     return props;
   }
 
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

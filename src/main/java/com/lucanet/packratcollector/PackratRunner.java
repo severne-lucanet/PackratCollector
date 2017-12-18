@@ -18,23 +18,27 @@ import java.util.concurrent.Executors;
 
 @Component
 public class PackratRunner implements ApplicationRunner {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(PackratRunner.class);
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger                logger;
   private final List<MessageConsumer> messageConsumerList;
-  private final ExecutorService consumerExecutorService;
+  private final ExecutorService       consumerExecutorService;
 
+  // ============================  Constructors  ===========================79
   @Autowired
   public PackratRunner(JSONMessageConsumer jsonMessageConsumer, FileMessageConsumer fileMessageConsumer) {
+    logger = LoggerFactory.getLogger(PackratRunner.class);
     messageConsumerList = new ArrayList<>();
     messageConsumerList.add(jsonMessageConsumer);
     messageConsumerList.add(fileMessageConsumer);
     consumerExecutorService = Executors.newFixedThreadPool(messageConsumerList.size());
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void run(ApplicationArguments args) throws Exception {
-    LOGGER.debug("Running Message Consumers...");
+    logger.debug("Running Message Consumers...");
     messageConsumerList.forEach(messageConsumer ->
       consumerExecutorService.submit(messageConsumer::run)
     );
@@ -42,7 +46,10 @@ public class PackratRunner implements ApplicationRunner {
 
   @PreDestroy
   public void shutdown() {
-    LOGGER.debug("Stopping Message Consumers...");
+    logger.debug("Stopping Message Consumers...");
     messageConsumerList.forEach(MessageConsumer::stop);
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

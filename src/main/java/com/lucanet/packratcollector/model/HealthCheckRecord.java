@@ -10,12 +10,15 @@ import java.util.Map;
  * Wrapper class for Document to represent a HealthCheck entity for usage in the Packrat Collector
  */
 public class HealthCheckRecord extends Document {
-
-  private static final String SYSTEM_UUID = "systemUUID";
-  private static final String SESSION_TIMESTAMP = "sessionTimestamp";
+  // =========================== Class Variables ===========================79
+  private static final String SYSTEM_UUID           = "systemUUID";
+  private static final String SESSION_TIMESTAMP     = "sessionTimestamp";
   private static final String HEALTHCHECK_TIMESTAMP = "healthCheckTimestamp";
-  private static final String DATA = "data";
+  private static final String DATA                  = "data";
 
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  // ============================  Constructors  ===========================79
   public HealthCheckRecord(HealthCheckHeader healthCheckHeader, Map<String, Object> data) {
     put("_id", healthCheckHeader.toString());
     put(SYSTEM_UUID, healthCheckHeader.getSystemUUID());
@@ -24,6 +27,7 @@ public class HealthCheckRecord extends Document {
     put(DATA, data);
   }
 
+  // ============================ Public Methods ===========================79
   public String getSystemUUID() {
     return getString(SYSTEM_UUID);
   }
@@ -56,4 +60,7 @@ public class HealthCheckRecord extends Document {
   public void setData(JsonNode data) {
     put(DATA, data);
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

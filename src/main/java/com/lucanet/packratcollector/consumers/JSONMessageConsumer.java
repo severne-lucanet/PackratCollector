@@ -13,7 +13,10 @@ import java.util.Map;
 
 @Component
 public class JSONMessageConsumer extends AbstractMessageConsumer<Map<String, Object>> {
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  // ============================  Constructors  ===========================79
   @Autowired
   public JSONMessageConsumer(
       PackratCollectorConfig packratCollectorConfig,
@@ -32,4 +35,7 @@ public class JSONMessageConsumer extends AbstractMessageConsumer<Map<String, Obj
     );
   }
 
+  // ============================ Public Methods ===========================79
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

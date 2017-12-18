@@ -12,7 +12,10 @@ import java.util.List;
 
 @Component
 public class FileMessageConsumer extends AbstractMessageConsumer<byte[]> {
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  // ============================  Constructors  ===========================79
   @Autowired
   public FileMessageConsumer(
       PackratCollectorConfig packratCollectorConfig,
@@ -31,4 +34,7 @@ public class FileMessageConsumer extends AbstractMessageConsumer<byte[]> {
     );
   }
 
+  // ============================ Public Methods ===========================79
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

@@ -10,13 +10,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FileRecordObservableImpl implements FileRecordObserver {
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger logger;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileRecordObservableImpl.class);
-
+  // ============================  Constructors  ===========================79
   @Autowired
   public FileRecordObservableImpl() {
+    logger = LoggerFactory.getLogger(FileRecordObservableImpl.class);
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void onSubscribe(Disposable d) {
     //No-Op
@@ -27,17 +32,20 @@ public class FileRecordObservableImpl implements FileRecordObserver {
     if ((consumerRecord.key() != null) && ((consumerRecord.value() != null) && (consumerRecord.value().length > 0))) {
       //TODO: Upload to Elastic Stack
     } else {
-      LOGGER.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
+      logger.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
     }
   }
 
   @Override
   public void onError(Throwable e) {
-    LOGGER.error("Error in processing File Record: {}", e.getMessage());
+    logger.error("Error in processing File Record: {}", e.getMessage());
   }
 
   @Override
   public void onComplete() {
     //No-Op
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

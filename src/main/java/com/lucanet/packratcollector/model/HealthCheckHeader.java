@@ -1,14 +1,18 @@
 package com.lucanet.packratcollector.model;
 
 public class HealthCheckHeader {
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
   private String systemUUID;
-  private long sessionTimestamp;
-  private long healthCheckTimestamp;
+  private long   sessionTimestamp;
+  private long   healthCheckTimestamp;
 
+  // ============================  Constructors  ===========================79
   public HealthCheckHeader() {
   }
 
+  // ============================ Public Methods ===========================79
   public String getSystemUUID() {
     return systemUUID;
   }
@@ -37,4 +41,7 @@ public class HealthCheckHeader {
   public String toString() {
     return String.format("%s:%d@%d", systemUUID, sessionTimestamp, healthCheckTimestamp);
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

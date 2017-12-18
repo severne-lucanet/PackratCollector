@@ -14,16 +14,20 @@ import java.util.Map;
 
 @Component
 public class JSONRecordObserverImpl implements JSONRecordObserver {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(JSONRecordObserverImpl.class);
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger             logger;
   private final DatabaseConnection databaseConnection;
 
+  // ============================  Constructors  ===========================79
   @Autowired
   public JSONRecordObserverImpl(DatabaseConnection databaseConnection) {
+    this.logger = LoggerFactory.getLogger(JSONRecordObserverImpl.class);
     this.databaseConnection = databaseConnection;
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void onSubscribe(Disposable d) {
     //No-Op
@@ -34,27 +38,30 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
     try {
       databaseConnection.updateOffset(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), (consumerRecord.offset() + 1));
     } catch (IllegalArgumentException iae) {
-      LOGGER.error("Unable to persist offset for topic '{}' partition {}: {}", consumerRecord.topic(), consumerRecord.partition(), iae.getMessage());
+      logger.error("Unable to persist offset for topic '{}' partition {}: {}", consumerRecord.topic(), consumerRecord.partition(), iae.getMessage());
     }
     if ((consumerRecord.key() != null) && (consumerRecord.value() != null)) {
-      LOGGER.debug("Record received for '{}': {}", consumerRecord.topic(), consumerRecord.value());
+      logger.debug("Record received for '{}': {}", consumerRecord.topic(), consumerRecord.value());
       try {
         databaseConnection.persistRecord(consumerRecord);
       } catch (IllegalArgumentException iae) {
-        LOGGER.error("Unable to write '{}' record {}@{}: topic does not exist in database", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
+        logger.error("Unable to write '{}' record {}@{}: topic does not exist in database", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
       }
     } else {
-      LOGGER.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
+      logger.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
     }
   }
 
   @Override
   public void onError(Throwable e) {
-    LOGGER.error("Error in processing JSON Record: {}", e.getMessage());
+    logger.error("Error in processing JSON Record: {}", e.getMessage());
   }
 
   @Override
   public void onComplete() {
     //No-Op
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

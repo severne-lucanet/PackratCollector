@@ -13,18 +13,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JSONDeserializer implements Deserializer<Map<String, Object>> {
-
-  private final Logger logger = LoggerFactory.getLogger(JSONDeserializer.class);
-  private final ObjectMapper objectMapper;
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger                                 logger;
+  private final ObjectMapper                           objectMapper;
   private final TypeReference<HashMap<String, Object>> typeReference;
-  private final StringDeserializer stringDeserializer;
+  private final StringDeserializer                     stringDeserializer;
 
+  // ============================  Constructors  ===========================79
   public JSONDeserializer() {
+    logger = LoggerFactory.getLogger(JSONDeserializer.class);
     objectMapper = new ObjectMapper();
     typeReference = new TypeReference<HashMap<String, Object>>(){};
     stringDeserializer = new StringDeserializer();
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void configure(Map<String, ?> configs, boolean isKey) {
     stringDeserializer.configure(configs, isKey);
@@ -44,4 +49,7 @@ public class JSONDeserializer implements Deserializer<Map<String, Object>> {
   public void close() {
     stringDeserializer.close();
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

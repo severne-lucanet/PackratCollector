@@ -10,15 +10,19 @@ import java.io.IOException;
 import java.util.Map;
 
 public class HealthCheckHeaderDeserializer implements Deserializer<HealthCheckHeader> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(HealthCheckHeaderDeserializer.class);
-
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger       logger;
   private final ObjectMapper objectMapper;
 
+  // ============================  Constructors  ===========================79
   public HealthCheckHeaderDeserializer() {
+    logger = LoggerFactory.getLogger(HealthCheckHeaderDeserializer.class);
     objectMapper = new ObjectMapper();
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void configure(Map<String, ?> configs, boolean isKey) {
     //No-Op
@@ -29,7 +33,7 @@ public class HealthCheckHeaderDeserializer implements Deserializer<HealthCheckHe
     try {
       return objectMapper.readValue(data, HealthCheckHeader.class);
     } catch (IOException ioe) {
-      LOGGER.error("Error deserializing HealthCheckHeader: {}", ioe.getMessage());
+      logger.error("Error deserializing HealthCheckHeader: {}", ioe.getMessage());
       return null;
     }
   }
@@ -38,4 +42,7 @@ public class HealthCheckHeaderDeserializer implements Deserializer<HealthCheckHe
   public void close() {
     //No-Op
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }

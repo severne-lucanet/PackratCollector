@@ -18,16 +18,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
-
-  private final Logger logger;
-  private final KafkaConsumer<HealthCheckHeader, T> messageConsumer;
-  private final AtomicBoolean isRunning;
-  private final List<String> topicsList;
-  private final ExecutorService threadPoolExecutor;
+abstract class AbstractMessageConsumer<T> implements MessageConsumer {
+  // =========================== Class Variables ===========================79
+  // ============================ Class Methods ============================79
+  // ============================   Variables    ===========================79
+  private final Logger                                               logger;
+  private final KafkaConsumer<HealthCheckHeader, T>                  messageConsumer;
+  private final AtomicBoolean                                        isRunning;
+  private final List<String>                                         topicsList;
+  private final ExecutorService                                      threadPoolExecutor;
   private final RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver;
-  private final DatabaseConnection databaseConnection;
+  private final DatabaseConnection                                   databaseConnection;
 
+  // ============================  Constructors  ===========================79
   AbstractMessageConsumer(
       Properties commonProperties,
       Class<?> valueDeserializerClass,
@@ -36,7 +39,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
       RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver,
       DatabaseConnection databaseConnection
   ) {
-    logger = LoggerFactory.getLogger(getClass());
+    this.logger = LoggerFactory.getLogger(getClass());
     commonProperties.setProperty("value.deserializer", valueDeserializerClass.getCanonicalName());
     this.messageConsumer = new KafkaConsumer<>(commonProperties);
     this.isRunning = new AtomicBoolean(false);
@@ -46,6 +49,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
     this.databaseConnection = databaseConnection;
   }
 
+  // ============================ Public Methods ===========================79
   @Override
   public void run() {
     messageConsumer.subscribe(topicsList);
@@ -78,4 +82,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
   public void stop() {
     this.isRunning.set(false);
   }
+
+  // ========================== Protected Methods ==========================79
+  // =========================== Private Methods ===========================79
 }
