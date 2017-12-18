@@ -1,10 +1,9 @@
 package com.lucanet.packratcollector.consumers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.lucanet.packratcollector.config.PackratCollectorConfig;
+import com.lucanet.packratcollector.db.DatabaseConnection;
 import com.lucanet.packratcollector.model.deserializers.JSONDeserializer;
 import com.lucanet.packratcollector.observers.JSONRecordObserver;
-import com.lucanet.packratcollector.services.OffsetLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,7 @@ public class JSONMessageConsumer extends AbstractMessageConsumer<Map<String, Obj
       @Value("#{'${packrat.consumers.json.topics}'.split(',')}") List<String> topicsList,
       @Value("${packrat.consumers.json.threadpoolsize}") int threadPoolSize,
       JSONRecordObserver recordObserver,
-      OffsetLookupService offsetLookupService
+      DatabaseConnection databaseConnection
   ) {
     super(
         packratCollectorConfig.generateCommonProperties(),
@@ -29,7 +28,7 @@ public class JSONMessageConsumer extends AbstractMessageConsumer<Map<String, Obj
         topicsList,
         threadPoolSize,
         recordObserver,
-        offsetLookupService
+        databaseConnection
     );
   }
 

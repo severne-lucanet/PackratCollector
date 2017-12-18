@@ -1,8 +1,7 @@
 package com.lucanet.packratcollector.observers;
 
 import com.lucanet.packratcollector.model.HealthCheckHeader;
-import com.lucanet.packratcollector.persister.RecordPersister;
-import com.lucanet.packratcollector.services.OffsetLookupService;
+import com.lucanet.packratcollector.db.DatabaseConnection;
 import io.reactivex.disposables.Disposable;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -18,13 +17,11 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JSONRecordObserverImpl.class);
 
-  private final RecordPersister recordPersister;
-  private final OffsetLookupService offsetLookupService;
+  private final DatabaseConnection databaseConnection;
 
   @Autowired
-  public JSONRecordObserverImpl(RecordPersister recordPersister, OffsetLookupService offsetLookupService) {
-    this.recordPersister = recordPersister;
-    this.offsetLookupService = offsetLookupService;
+  public JSONRecordObserverImpl(DatabaseConnection databaseConnection) {
+    this.databaseConnection = databaseConnection;
   }
 
   @Override
@@ -34,10 +31,18 @@ public class JSONRecordObserverImpl implements JSONRecordObserver {
 
   @Override
   public void onNext(ConsumerRecord<HealthCheckHeader, Map<String, Object>> consumerRecord) {
-    offsetLookupService.saveOffset(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), (consumerRecord.offset() + 1));
+    try {
+      databaseConnection.updateOffset(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), (consumerRecord.offset() + 1));
+    } catch (IllegalArgumentException iae) {
+      LOGGER.error("Unable to persist offset for topic '{}' partition {}: {}", consumerRecord.topic(), consumerRecord.partition(), iae.getMessage());
+    }
     if ((consumerRecord.key() != null) && (consumerRecord.value() != null)) {
       LOGGER.debug("Record received for '{}': {}", consumerRecord.topic(), consumerRecord.value());
-      recordPersister.persistJSONRecord(consumerRecord);
+      try {
+        databaseConnection.persistRecord(consumerRecord);
+      } catch (IllegalArgumentException iae) {
+        LOGGER.error("Unable to write '{}' record {}@{}: topic does not exist in database", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
+      }
     } else {
       LOGGER.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
     }

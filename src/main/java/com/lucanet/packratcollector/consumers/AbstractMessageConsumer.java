@@ -1,8 +1,8 @@
 package com.lucanet.packratcollector.consumers;
 
+import com.lucanet.packratcollector.db.DatabaseConnection;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.observers.RecordObserver;
-import com.lucanet.packratcollector.services.OffsetLookupService;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,7 +26,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
   private final List<String> topicsList;
   private final ExecutorService threadPoolExecutor;
   private final RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver;
-  private final OffsetLookupService offsetLookupService;
+  private final DatabaseConnection databaseConnection;
 
   AbstractMessageConsumer(
       Properties commonProperties,
@@ -34,7 +34,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
       List<String> topicsList,
       int threadPoolSize,
       RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver,
-      OffsetLookupService offsetLookupService
+      DatabaseConnection databaseConnection
   ) {
     logger = LoggerFactory.getLogger(getClass());
     commonProperties.setProperty("value.deserializer", valueDeserializerClass.getCanonicalName());
@@ -43,7 +43,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
     this.topicsList = topicsList;
     this.threadPoolExecutor = Executors.newFixedThreadPool(threadPoolSize);
     this.recordObserver = recordObserver;
-    this.offsetLookupService = offsetLookupService;
+    this.databaseConnection = databaseConnection;
   }
 
   @Override
@@ -53,7 +53,7 @@ public abstract class AbstractMessageConsumer<T> implements MessageConsumer {
     topicsList.forEach(topic ->
       messageConsumer.partitionsFor(topic).forEach(partitionInfo -> {
         TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(), partitionInfo.partition());
-        long topicPartitionOffset = offsetLookupService.getOffset(topicPartition);
+        long topicPartitionOffset = databaseConnection.getOffset(topicPartition);
         logger.info("Setting offset to {} for topic '{}' partition {}", topicPartitionOffset, partitionInfo.topic(), partitionInfo.partition());
         messageConsumer.seek(topicPartition, topicPartitionOffset);
       })

@@ -1,7 +1,6 @@
 package com.lucanet.packratcollector.observers;
 
 import com.lucanet.packratcollector.model.HealthCheckHeader;
-import com.lucanet.packratcollector.persister.RecordPersister;
 import io.reactivex.disposables.Disposable;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -14,11 +13,8 @@ public class FileRecordObservableImpl implements FileRecordObserver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FileRecordObservableImpl.class);
 
-  private final RecordPersister recordPersister;
-
   @Autowired
-  public FileRecordObservableImpl(RecordPersister recordPersister) {
-    this.recordPersister = recordPersister;
+  public FileRecordObservableImpl() {
   }
 
   @Override
@@ -29,7 +25,7 @@ public class FileRecordObservableImpl implements FileRecordObserver {
   @Override
   public void onNext(ConsumerRecord<HealthCheckHeader, byte[]> consumerRecord) {
     if ((consumerRecord.key() != null) && ((consumerRecord.value() != null) && (consumerRecord.value().length > 0))) {
-      recordPersister.persistFileRecord(consumerRecord);
+      //TODO: Upload to Elastic Stack
     } else {
       LOGGER.warn("Unable to process '{}' record {}@{}: either key or value were null", consumerRecord.topic(), consumerRecord.offset(), consumerRecord.timestamp());
     }
