@@ -3,8 +3,10 @@ package com.lucanet.packratcollector.consumers;
 import com.lucanet.packratcollector.config.PackratCollectorConfig;
 import com.lucanet.packratcollector.db.DatabaseConnection;
 import com.lucanet.packratcollector.observers.FileRecordObserver;
+import com.lucanet.packratcollector.observers.RecordObserver;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +23,7 @@ public class FileMessageConsumer extends AbstractMessageConsumer<byte[]> {
       PackratCollectorConfig packratCollectorConfig,
       @Value("#{'${packrat.consumers.file.topics}'.split(',')}") List<String> topicsList,
       @Value("${packrat.consumers.file.threadpoolsize}") int threadPoolSize,
-      FileRecordObserver fileRecordObserver,
+      @Qualifier("fileRecordObserver") RecordObserver<byte[]> fileRecordObserver,
       DatabaseConnection databaseConnection
   ) {
     super(

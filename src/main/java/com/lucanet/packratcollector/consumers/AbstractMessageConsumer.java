@@ -5,7 +5,6 @@ import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.observers.RecordObserver;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
@@ -27,7 +26,7 @@ abstract class AbstractMessageConsumer<T> implements MessageConsumer {
   private final AtomicBoolean                                        isRunning;
   private final List<String>                                         topicsList;
   private final ExecutorService                                      threadPoolExecutor;
-  private final RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver;
+  private final RecordObserver<T> recordObserver;
   private final DatabaseConnection                                   databaseConnection;
 
   // ============================  Constructors  ===========================79
@@ -36,7 +35,7 @@ abstract class AbstractMessageConsumer<T> implements MessageConsumer {
       Class<?> valueDeserializerClass,
       List<String> topicsList,
       int threadPoolSize,
-      RecordObserver<ConsumerRecord<HealthCheckHeader, T>> recordObserver,
+      RecordObserver<T> recordObserver,
       DatabaseConnection databaseConnection
   ) {
     this.logger = LoggerFactory.getLogger(getClass());

@@ -1,11 +1,10 @@
 package com.lucanet.packratcollector;
 
-import com.lucanet.packratcollector.consumers.FileMessageConsumer;
-import com.lucanet.packratcollector.consumers.JSONMessageConsumer;
 import com.lucanet.packratcollector.consumers.MessageConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,10 @@ public class PackratRunner implements ApplicationRunner {
 
   // ============================  Constructors  ===========================79
   @Autowired
-  public PackratRunner(JSONMessageConsumer jsonMessageConsumer, FileMessageConsumer fileMessageConsumer) {
+  public PackratRunner(
+      @Qualifier("JSONMessageConsumer") MessageConsumer jsonMessageConsumer,
+      @Qualifier("fileMessageConsumer") MessageConsumer fileMessageConsumer
+  ) {
     logger = LoggerFactory.getLogger(PackratRunner.class);
     messageConsumerList = new ArrayList<>();
     messageConsumerList.add(jsonMessageConsumer);
