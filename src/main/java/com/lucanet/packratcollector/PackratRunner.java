@@ -10,10 +10,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Component
 public class PackratRunner implements ApplicationRunner {
@@ -22,7 +20,6 @@ public class PackratRunner implements ApplicationRunner {
   // ============================   Variables    ===========================79
   private final Logger                logger;
   private final List<MessageConsumer> messageConsumerList;
-  private final ExecutorService       consumerExecutorService;
 
   // ============================  Constructors  ===========================79
   @Autowired
@@ -31,19 +28,14 @@ public class PackratRunner implements ApplicationRunner {
       @Qualifier("fileMessageConsumer") MessageConsumer fileMessageConsumer
   ) {
     logger = LoggerFactory.getLogger(PackratRunner.class);
-    messageConsumerList = new ArrayList<>();
-    messageConsumerList.add(jsonMessageConsumer);
-    messageConsumerList.add(fileMessageConsumer);
-    consumerExecutorService = Executors.newFixedThreadPool(messageConsumerList.size());
+    messageConsumerList = Arrays.asList(jsonMessageConsumer, fileMessageConsumer);
   }
 
   // ============================ Public Methods ===========================79
   @Override
   public void run(ApplicationArguments args) throws Exception {
     logger.debug("Running Message Consumers...");
-    messageConsumerList.forEach(messageConsumer ->
-      consumerExecutorService.submit(messageConsumer::run)
-    );
+    messageConsumerList.forEach(MessageConsumer::run);
   }
 
   @PreDestroy

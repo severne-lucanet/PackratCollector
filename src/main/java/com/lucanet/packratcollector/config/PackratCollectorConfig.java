@@ -1,6 +1,8 @@
 package com.lucanet.packratcollector.config;
 
 import com.lucanet.packratcollector.model.deserializers.HealthCheckHeaderDeserializer;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,21 +15,18 @@ public class PackratCollectorConfig {
   // ============================   Variables    ===========================79
   private final String  bootstrapServers;
   private final String  groupId;
-  private final Boolean enableAutoCommit;
-  private final Long    autoCommitInterval;
-  private final Long    sessionTimeout;
+  private final Integer autoCommitInterval;
+  private final Integer sessionTimeout;
 
   // ============================  Constructors  ===========================79
   public PackratCollectorConfig(
       @Value("${packrat.bootstrapServers}") String bootstrapServers,
       @Value("${packrat.groupId}") String groupId,
-      @Value("${packrat.enableAutoCommit}") Boolean enableAutoCommit,
-      @Value("${packrat.autoCommitInterval}") Long autoCommitInterval,
-      @Value("${packrat.sessionTimeout}") Long sessionTimeout
+      @Value("${packrat.autoCommitInterval}") Integer autoCommitInterval,
+      @Value("${packrat.sessionTimeout}") Integer sessionTimeout
   ) {
     this.bootstrapServers = bootstrapServers;
     this.groupId = groupId;
-    this.enableAutoCommit = enableAutoCommit;
     this.autoCommitInterval = autoCommitInterval;
     this.sessionTimeout = sessionTimeout;
   }
@@ -35,12 +34,12 @@ public class PackratCollectorConfig {
   // ============================ Public Methods ===========================79
   public Properties generateCommonProperties() {
     Properties props = new Properties();
-    props.put("bootstrap.servers", bootstrapServers);
-    props.put("group.id", groupId);
-    props.put("enable.auto.commit", enableAutoCommit.toString());
-    props.put("auto.commit.interval.ms", autoCommitInterval.toString());
-    props.put("session.timeout.ms", sessionTimeout.toString());
-    props.put("key.deserializer", HealthCheckHeaderDeserializer.class.getCanonicalName());
+    props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, autoCommitInterval);
+    props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, HealthCheckHeaderDeserializer.class.getCanonicalName());
     return props;
   }
 

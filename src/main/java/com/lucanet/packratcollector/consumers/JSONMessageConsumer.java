@@ -3,7 +3,6 @@ package com.lucanet.packratcollector.consumers;
 import com.lucanet.packratcollector.config.PackratCollectorConfig;
 import com.lucanet.packratcollector.db.DatabaseConnection;
 import com.lucanet.packratcollector.model.deserializers.JSONDeserializer;
-import com.lucanet.packratcollector.observers.JSONRecordObserver;
 import com.lucanet.packratcollector.observers.RecordObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
