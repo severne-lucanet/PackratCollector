@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public class HealthCheckRecord extends Document {
   // =========================== Class Variables ===========================79
+  private static final String SERIAL_ID             = "serialID";
   private static final String SYSTEM_UUID           = "systemUUID";
   private static final String SESSION_TIMESTAMP     = "sessionTimestamp";
   private static final String HEALTHCHECK_TIMESTAMP = "healthCheckTimestamp";
@@ -21,6 +22,7 @@ public class HealthCheckRecord extends Document {
   // ============================  Constructors  ===========================79
   public HealthCheckRecord(HealthCheckHeader healthCheckHeader, Map<String, Object> data) {
     put("_id", healthCheckHeader.toString());
+    put(SERIAL_ID, healthCheckHeader.getSerialID());
     put(SYSTEM_UUID, healthCheckHeader.getSystemUUID());
     put(SESSION_TIMESTAMP, healthCheckHeader.getSessionTimestamp());
     put(HEALTHCHECK_TIMESTAMP, healthCheckHeader.getHealthCheckTimestamp());
@@ -28,6 +30,14 @@ public class HealthCheckRecord extends Document {
   }
 
   // ============================ Public Methods ===========================79
+  public String getSerialID() {
+    return getString(SERIAL_ID);
+  }
+
+  public void setSystemOwner(String systemOwner) {
+    put(SERIAL_ID, systemOwner);
+  }
+
   public String getSystemUUID() {
     return getString(SYSTEM_UUID);
   }

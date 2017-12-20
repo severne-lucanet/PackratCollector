@@ -4,6 +4,7 @@ public class HealthCheckHeader {
   // =========================== Class Variables ===========================79
   // ============================ Class Methods ============================79
   // ============================   Variables    ===========================79
+  private String serialID;
   private String systemUUID;
   private long   sessionTimestamp;
   private long   healthCheckTimestamp;
@@ -13,6 +14,14 @@ public class HealthCheckHeader {
   }
 
   // ============================ Public Methods ===========================79
+  public String getSerialID() {
+    return serialID;
+  }
+
+  public void setSerialID(String serialID) {
+    this.serialID = serialID;
+  }
+
   public String getSystemUUID() {
     return systemUUID;
   }

@@ -3,8 +3,11 @@ package com.lucanet.packratcollector.db;
 import com.lucanet.packratcollector.model.HealthCheckHeader;
 import com.lucanet.packratcollector.model.HealthCheckRecord;
 import com.mongodb.*;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -15,12 +18,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 public class MongoDatabaseConnection implements DatabaseConnection {
   // =========================== Class Variables ===========================79
-  private static final String OFFSETS_COLLECTION_NAME = "offsets";
+  private static final String OFFSETS_COLLECTION_NAME = "_offsets";
   private static final String OFFSETS_TOPIC_KEY       = "topic";
   private static final String OFFSETS_PARTITION_KEY   = "partition";
   private static final String OFFSETS_OFFSET_KEY      = "offset";
@@ -56,7 +63,7 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     HealthCheckHeader header = record.key();
     HealthCheckRecord healthCheckRecord = new HealthCheckRecord(header, record.value());
     try {
-      healthCheckDB.getCollection(collectionName).insertOne(healthCheckRecord);
+      healthCheckDB.getCollection(collectionName, HealthCheckRecord.class).insertOne(healthCheckRecord);
     } catch (MongoWriteException mwe) {
       if (mwe.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
         logger.warn("Cannot write message {} - entry already exists with this key for topic '{}'", header, record.topic());
@@ -110,6 +117,50 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     if (updatedDoc != null) {
       logger.debug("Set new offset to {} for topic '{}' partition {}", newOffset, partition.topic(), partition.partition());
     }
+  }
+
+  @Override
+  public List<String> getTopics() {
+    List<String> topicNamesList = new ArrayList<>();
+    healthCheckDB.listCollections()
+        .filter(Filters.ne("name", OFFSETS_COLLECTION_NAME))
+        .map(document -> document.getString("name"))
+        .forEach((Consumer<? super String>) topicNamesList::add);
+    return topicNamesList;
+  }
+
+  @Override
+  public List<String> getSystemsInTopic(String topicName) {
+    List<String> systemUUIDList = new ArrayList<>();
+    healthCheckDB.getCollection(topicName, HealthCheckRecord.class)
+        .distinct("systemUUID", String.class)
+        .forEach((Consumer<? super String>) systemUUIDList::add);
+    return systemUUIDList;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Long> getSessionTimestamps(String topicName, String systemUUID) {
+    AggregateIterable<Document> iterable = healthCheckDB.getCollection(topicName)
+        .aggregate(
+            Arrays.asList(
+                Aggregates.match(Filters.eq("systemUUID", systemUUID)),
+                Aggregates.group("$systemUUID", Accumulators.addToSet("sessionTimestamps", "$sessionTimestamp"))
+            )
+        );
+    return iterable.first().get("sessionTimestamps", List.class);
+  }
+
+  @Override
+  public List<Map<String, Object>> getSessionHealthChecks(String topicName, String systemUUID, Long sessionTimestamp) {
+    List<Map<String, Object>> recordList = new ArrayList<>();
+    healthCheckDB.getCollection(topicName, Document.class)
+        .find(Filters.and(
+            Filters.eq("systemUUID", systemUUID),
+            Filters.eq("sessionTimestamp", sessionTimestamp)
+        ), Document.class)
+        .forEach((Consumer<? super Document>) recordList::add);
+    return recordList;
   }
 
   // ========================== Protected Methods ==========================79
