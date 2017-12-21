@@ -11,11 +11,11 @@ import java.util.Map;
  */
 public class HealthCheckRecord extends Document {
   // =========================== Class Variables ===========================79
-  private static final String SERIAL_ID             = "serialID";
-  private static final String SYSTEM_UUID           = "systemUUID";
-  private static final String SESSION_TIMESTAMP     = "sessionTimestamp";
-  private static final String HEALTHCHECK_TIMESTAMP = "healthCheckTimestamp";
-  private static final String DATA                  = "data";
+  public static final String SERIAL_ID             = "serialID";
+  public static final String SYSTEM_UUID           = "systemUUID";
+  public static final String SESSION_TIMESTAMP     = "sessionTimestamp";
+  public static final String HEALTHCHECK_TIMESTAMP = "healthCheckTimestamp";
+  public static final String DATA                  = "data";
 
   // ============================ Class Methods ============================79
   // ============================   Variables    ===========================79

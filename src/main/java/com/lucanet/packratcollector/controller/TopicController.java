@@ -1,7 +1,6 @@
 package com.lucanet.packratcollector.controller;
 
 import com.lucanet.packratcollector.db.DatabaseConnection;
-import com.lucanet.packratcollector.model.HealthCheckRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,7 @@ public class TopicController {
     this.databaseConnection = databaseConnection;
   }
 
-  @RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
+  @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
   public List<String> getTopics(HttpServletResponse response) {
     List<String> topicsList;
     try {
@@ -44,7 +43,7 @@ public class TopicController {
       distinctSystemsList = databaseConnection.getSystemsInTopic(topicName);
       response.setStatus(HttpServletResponse.SC_OK);
     } catch (Exception e) {
-      logger.error("Error occurred in getDistinctSystems: {}", e.getMessage());
+      logger.error("Error occurred in getDistinctSystems: {} ({})", e.getMessage(), e.getClass());
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       distinctSystemsList = new ArrayList<>();
     }

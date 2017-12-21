@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class MongoDatabaseConnection implements DatabaseConnection {
@@ -121,21 +121,17 @@ public class MongoDatabaseConnection implements DatabaseConnection {
 
   @Override
   public List<String> getTopics() {
-    List<String> topicNamesList = new ArrayList<>();
-    healthCheckDB.listCollections()
+    return healthCheckDB.listCollections()
         .filter(Filters.ne("name", OFFSETS_COLLECTION_NAME))
         .map(document -> document.getString("name"))
-        .forEach((Consumer<? super String>) topicNamesList::add);
-    return topicNamesList;
+        .into(new ArrayList<>());
   }
 
   @Override
   public List<String> getSystemsInTopic(String topicName) {
-    List<String> systemUUIDList = new ArrayList<>();
-    healthCheckDB.getCollection(topicName, HealthCheckRecord.class)
-        .distinct("systemUUID", String.class)
-        .forEach((Consumer<? super String>) systemUUIDList::add);
-    return systemUUIDList;
+    return healthCheckDB.getCollection(topicName, HealthCheckRecord.class)
+        .distinct(HealthCheckRecord.SYSTEM_UUID, String.class)
+        .into(new ArrayList<>());
   }
 
   @Override
@@ -144,23 +140,49 @@ public class MongoDatabaseConnection implements DatabaseConnection {
     AggregateIterable<Document> iterable = healthCheckDB.getCollection(topicName)
         .aggregate(
             Arrays.asList(
-                Aggregates.match(Filters.eq("systemUUID", systemUUID)),
-                Aggregates.group("$systemUUID", Accumulators.addToSet("sessionTimestamps", "$sessionTimestamp"))
+                Aggregates.match(Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID)),
+                Aggregates.group(String.format("$%s", HealthCheckRecord.SYSTEM_UUID), Accumulators.addToSet(HealthCheckRecord.SESSION_TIMESTAMP, String.format("$%s", HealthCheckRecord.SESSION_TIMESTAMP)))
             )
         );
-    return iterable.first().get("sessionTimestamps", List.class);
+    return iterable.first().get(HealthCheckRecord.SESSION_TIMESTAMP, List.class);
   }
 
   @Override
   public List<Map<String, Object>> getSessionHealthChecks(String topicName, String systemUUID, Long sessionTimestamp) {
-    List<Map<String, Object>> recordList = new ArrayList<>();
-    healthCheckDB.getCollection(topicName, Document.class)
+    return healthCheckDB.getCollection(topicName, Document.class)
         .find(Filters.and(
-            Filters.eq("systemUUID", systemUUID),
-            Filters.eq("sessionTimestamp", sessionTimestamp)
+            Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID),
+            Filters.eq(HealthCheckRecord.SESSION_TIMESTAMP, sessionTimestamp)
         ), Document.class)
-        .forEach((Consumer<? super Document>) recordList::add);
-    return recordList;
+        .into(new ArrayList<>());
+  }
+
+  @Override
+  public Map<String, List<String>> getSerialIDS() {
+    return getTopics().stream()
+        .collect(Collectors.toMap(
+            topic -> topic,
+            topic -> healthCheckDB.getCollection(topic)
+                .distinct(HealthCheckRecord.SERIAL_ID, String.class)
+                .into(new ArrayList<>())
+        ));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Map<String, List<String>> getSystemsForSerialID(String serialID) {
+    return getTopics().stream()
+        .collect(Collectors.toMap(
+           topic -> topic,
+           topic -> healthCheckDB.getCollection(topic)
+               .aggregate(
+                   Arrays.asList(
+                       Aggregates.match(Filters.eq(HealthCheckRecord.SERIAL_ID, serialID)),
+                       Aggregates.group(String.format("$%s", HealthCheckRecord.SERIAL_ID), Accumulators.addToSet(HealthCheckRecord.SYSTEM_UUID, String.format("$%s", HealthCheckRecord.SYSTEM_UUID)))
+                   )
+               ).first()
+               .get(HealthCheckRecord.SYSTEM_UUID, List.class)
+        ));
   }
 
   // ========================== Protected Methods ==========================79
