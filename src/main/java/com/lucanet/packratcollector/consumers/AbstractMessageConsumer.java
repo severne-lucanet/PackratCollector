@@ -54,7 +54,9 @@ abstract class AbstractMessageConsumer<T> implements MessageConsumer {
   // ============================ Public Methods ===========================79
   @Override
   public void run() {
-    runnerThread.run();
+    logger.info("Starting consumer");
+    runnerThread.start();
+    logger.info("Consumer started");
   }
 
   @Override

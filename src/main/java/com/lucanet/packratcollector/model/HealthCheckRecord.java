@@ -3,13 +3,10 @@ package com.lucanet.packratcollector.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.bson.Document;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Wrapper class for Document to represent a HealthCheck entity for usage in the Packrat Collector
  */
-public class HealthCheckRecord extends Document {
+public class HealthCheckRecord<T> extends Document {
   // =========================== Class Variables ===========================79
   public static final String SERIAL_ID             = "serialID";
   public static final String SYSTEM_UUID           = "systemUUID";
@@ -20,7 +17,7 @@ public class HealthCheckRecord extends Document {
   // ============================ Class Methods ============================79
   // ============================   Variables    ===========================79
   // ============================  Constructors  ===========================79
-  public HealthCheckRecord(HealthCheckHeader healthCheckHeader, Map<String, Object> data) {
+  public HealthCheckRecord(HealthCheckHeader healthCheckHeader, T data) {
     put("_id", healthCheckHeader.toString());
     put(SERIAL_ID, healthCheckHeader.getSerialID());
     put(SYSTEM_UUID, healthCheckHeader.getSystemUUID());
@@ -63,8 +60,8 @@ public class HealthCheckRecord extends Document {
   }
 
   @SuppressWarnings("unchecked")
-  public Map<String, Object> getData() {
-    return (HashMap<String, Object>) get(DATA, HashMap.class);
+  public T getData() {
+    return (T) get(DATA);
   }
 
   public void setData(JsonNode data) {

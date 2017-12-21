@@ -58,10 +58,10 @@ public class MongoDatabaseConnection implements DatabaseConnection {
 
   // ============================ Public Methods ===========================79
   @Override
-  public void persistRecord(ConsumerRecord<HealthCheckHeader, Map<String, Object>> record) throws IllegalArgumentException {
+  public <T> void persistRecord(ConsumerRecord<HealthCheckHeader, T> record) throws IllegalArgumentException {
     String collectionName = record.topic().toLowerCase();
     HealthCheckHeader header = record.key();
-    HealthCheckRecord healthCheckRecord = new HealthCheckRecord(header, record.value());
+    HealthCheckRecord healthCheckRecord = new HealthCheckRecord<>(header, record.value());
     try {
       healthCheckDB.getCollection(collectionName, HealthCheckRecord.class).insertOne(healthCheckRecord);
     } catch (MongoWriteException mwe) {

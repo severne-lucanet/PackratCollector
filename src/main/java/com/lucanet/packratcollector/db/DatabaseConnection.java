@@ -12,7 +12,7 @@ public interface DatabaseConnection {
   // =============================  Variables  =============================79
   // ============================  Constructors  ===========================79
   // ============================ Public Methods ===========================79
-  void persistRecord(ConsumerRecord<HealthCheckHeader, Map<String, Object>> record) throws IllegalArgumentException;
+  <T> void persistRecord(ConsumerRecord<HealthCheckHeader, T> record) throws IllegalArgumentException;
   long getOffset(TopicPartition partition) throws IllegalArgumentException;
   void updateOffset(TopicPartition partition, long newOffset) throws IllegalArgumentException;
   List<String> getTopics();
