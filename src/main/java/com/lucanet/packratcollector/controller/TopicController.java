@@ -1,5 +1,6 @@
 package com.lucanet.packratcollector.controller;
 
+import com.lucanet.packratcollector.aspects.LogExecution;
 import com.lucanet.packratcollector.db.DatabaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ public class TopicController {
     this.databaseConnection = databaseConnection;
   }
 
+  @LogExecution
   @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
   public List<String> getTopics(HttpServletResponse response) {
     List<String> topicsList;
@@ -36,29 +38,44 @@ public class TopicController {
     return topicsList;
   }
 
+  @LogExecution
   @RequestMapping(value = "/{topicName}/systemuuids", method = RequestMethod.GET, produces = "application/json")
   public List<String> getDistinctSystems(HttpServletResponse response, @PathVariable("topicName") String topicName) {
-    List<String> distinctSystemsList;
+    List<String> distinctSystemsList = new ArrayList<>();
     try {
-      distinctSystemsList = databaseConnection.getSystemsInTopic(topicName);
+      distinctSystemsList.addAll(databaseConnection.getSystemsInTopic(topicName));
       response.setStatus(HttpServletResponse.SC_OK);
+    } catch (IllegalArgumentException iae) {
+      logger.warn("Illegal argument in SystemUUIDs query: {}", iae.getMessage());
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     } catch (Exception e) {
       logger.error("Error occurred in getDistinctSystems: {} ({})", e.getMessage(), e.getClass());
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      distinctSystemsList = new ArrayList<>();
     }
     return distinctSystemsList;
   }
 
+  @LogExecution
   @RequestMapping(value = "/{topicName}/sessions", method = RequestMethod.GET, produces = "application/json")
   public List<Long> getSessionTimestamps(
       HttpServletResponse response,
       @PathVariable("topicName") String topicName,
       @RequestParam("systemUUID") String systemUUID
   ) {
-    return databaseConnection.getSessionTimestamps(topicName, systemUUID);
+    List<Long> sessionTimestamps = new ArrayList<>();
+    try {
+      sessionTimestamps.addAll(databaseConnection.getSessionTimestamps(topicName, systemUUID));
+    } catch (IllegalArgumentException iae) {
+      logger.warn("Illegal argument in Session Timestamps query: {}", iae.getMessage());
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    } catch (Exception e) {
+      logger.error("Error occurred in getSessionTimestamps: {} ({})", e.getMessage(), e.getClass());
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+    return sessionTimestamps;
   }
 
+  @LogExecution
   @RequestMapping(value = "/{topicName}/healthchecks", method = RequestMethod.GET, produces = "application/json")
   public List<Map<String, Object>> getSessionHealthChecks(
       HttpServletResponse response,
@@ -66,7 +83,17 @@ public class TopicController {
       @RequestParam("systemUUID") String systemUUID,
       @RequestParam("sessionTimestamp") Long sessionTimestamp
   ) {
-    return databaseConnection.getSessionHealthChecks(topicName, systemUUID, sessionTimestamp);
+    List<Map<String, Object>> sessionHealthChecks = new ArrayList<>();
+    try {
+      sessionHealthChecks.addAll(databaseConnection.getSessionHealthChecks(topicName, systemUUID, sessionTimestamp));
+    } catch (IllegalArgumentException iae) {
+      logger.warn("Illegal argument in Session HealthChecks query: {}", iae.getMessage());
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    } catch (Exception e) {
+      logger.error("Error occurred in getSessionHealthChecks: {} ({})", e.getMessage(), e.getClass());
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+    return sessionHealthChecks;
   }
 
 }

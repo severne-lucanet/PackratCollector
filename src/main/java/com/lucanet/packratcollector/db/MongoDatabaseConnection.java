@@ -128,33 +128,51 @@ public class MongoDatabaseConnection implements DatabaseConnection {
   }
 
   @Override
-  public List<String> getSystemsInTopic(String topicName) {
-    return healthCheckDB.getCollection(topicName, HealthCheckRecord.class)
-        .distinct(HealthCheckRecord.SYSTEM_UUID, String.class)
-        .into(new ArrayList<>());
+  public List<String> getSystemsInTopic(String topicName) throws IllegalArgumentException {
+    if (getTopics().contains(topicName)) {
+      return healthCheckDB.getCollection(topicName, HealthCheckRecord.class)
+          .distinct(HealthCheckRecord.SYSTEM_UUID, String.class)
+          .into(new ArrayList<>());
+    } else {
+      throw new IllegalArgumentException(String.format("Topic '%s' doesn't exist", topicName));
+    }
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<Long> getSessionTimestamps(String topicName, String systemUUID) {
-    AggregateIterable<Document> iterable = healthCheckDB.getCollection(topicName)
-        .aggregate(
-            Arrays.asList(
-                Aggregates.match(Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID)),
-                Aggregates.group(String.format("$%s", HealthCheckRecord.SYSTEM_UUID), Accumulators.addToSet(HealthCheckRecord.SESSION_TIMESTAMP, String.format("$%s", HealthCheckRecord.SESSION_TIMESTAMP)))
-            )
-        );
-    return iterable.first().get(HealthCheckRecord.SESSION_TIMESTAMP, List.class);
+  public List<Long> getSessionTimestamps(String topicName, String systemUUID) throws IllegalArgumentException {
+    if (getTopics().contains(topicName)) {
+      AggregateIterable<Document> iterable = healthCheckDB.getCollection(topicName)
+          .aggregate(
+              Arrays.asList(
+                  Aggregates.match(Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID)),
+                  Aggregates.group(
+                      String.format("$%s", HealthCheckRecord.SYSTEM_UUID),
+                      Accumulators.addToSet(
+                          HealthCheckRecord.SESSION_TIMESTAMP,
+                          String.format("$%s", HealthCheckRecord.SESSION_TIMESTAMP)
+                      )
+                  )
+              )
+          );
+      return iterable.first().get(HealthCheckRecord.SESSION_TIMESTAMP, List.class);
+    } else {
+      throw new IllegalArgumentException(String.format("Topic '%s' doesn't exist", topicName));
+    }
   }
 
   @Override
-  public List<Map<String, Object>> getSessionHealthChecks(String topicName, String systemUUID, Long sessionTimestamp) {
-    return healthCheckDB.getCollection(topicName, Document.class)
-        .find(Filters.and(
-            Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID),
-            Filters.eq(HealthCheckRecord.SESSION_TIMESTAMP, sessionTimestamp)
-        ), Document.class)
-        .into(new ArrayList<>());
+  public List<Map<String, Object>> getSessionHealthChecks(String topicName, String systemUUID, Long sessionTimestamp) throws IllegalArgumentException {
+    if (getTopics().contains(topicName)) {
+      return healthCheckDB.getCollection(topicName, Document.class)
+          .find(Filters.and(
+              Filters.eq(HealthCheckRecord.SYSTEM_UUID, systemUUID),
+              Filters.eq(HealthCheckRecord.SESSION_TIMESTAMP, sessionTimestamp)
+          ), Document.class)
+          .into(new ArrayList<>());
+    } else {
+      throw new IllegalArgumentException(String.format("Topic '%s' doesn't exist", topicName));
+    }
   }
 
   @Override
